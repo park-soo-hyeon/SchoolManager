@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>동양미래대학교 컴퓨터공학부 키오스크</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    
+    <style>
+        /* --- 1. Reset & Global Styles --- */
+        :root {
+            --primary-blue: #005a9e; 
+            --active-yellow: #dbe000;
+            --bg-gray: #f5f5f5;
+            --text-dark: #222222;
+            --text-sub: #555555;
+            --section-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- 2. Main App Container --- */
+        #app {
+            width: 100%;
+            height: 100%;
+            max-width: 560px;
+            background-color: var(--bg-gray);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+        }
+
+        /* --- [NEW] Scroll Container --- */
+        /* 헤더와 메인 컨텐츠를 감싸서 전체가 스크롤되도록 함 */
+        .scroll-container {
+            flex: 1; /* 남은 공간 전체 차지 */
+            overflow-y: auto; /* 세로 스크롤 허용 */
+            display: flex;
+            flex-direction: column;
+            
+            /* 스크롤바 숨기기 (심미성) */
+            -ms-overflow-style: none; /* IE/Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        .scroll-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        /* --- 3. Header Section --- */
+        header {
+            background-color: var(--primary-blue);
+            color: #ffffff;
+            /* [수정] 하단 흰색 겹침 제거를 위해 패딩 조정 */
+            padding: 40px 30px 40px 30px; 
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .logo-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .logo-group i { font-size: 32px; margin-bottom: 8px; }
+        .logo-group h1 { font-size: 20px; font-weight: 800; line-height: 1.2; letter-spacing: -0.5px; }
+
+        .current-time {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.9;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .main-copy {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 30px;
+        }
+        .main-copy .sub { display: block; margin-top: 5px; font-size: 24px; opacity: 0.9; }
+
+        /* Slider Area */
+        .slider-wrapper {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-color: #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .slide-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 0.5s ease;
+        }
+        .slide-caption {
+            position: absolute; bottom: 0; width: 100%;
+            background: rgba(0,0,0,0.6); color: white;
+            padding: 8px 15px; font-size: 12px; text-align: right;
+        }
+
+        /* --- 4. Main Content Area --- */
+        .main-content {
+            background-color: white;
+            /* [수정] 스크롤 컨테이너 안에서 내용만큼 늘어나도록 설정 */
+            flex-shrink: 0; 
+            
+            /* [수정] 흰색 요철 및 겹침 제거, 여백 재조정 */
+            margin-top: 0; 
+            clip-path: none;
+            padding: 40px 30px 60px 30px; /* 하단 여백 넉넉히 */
+            
+            display: flex;
+            flex-direction: column;
+            gap: 30px; /* 섹션 간격 */
+        }
+
+        /* 공통 섹션 스타일 */
+        .info-section h2 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-blue);
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-content {
+            padding-left: 0; /* 깔끔하게 정렬 */
+        }
+
+        /* 1) 학부 소개 */
+        .intro-text {
+            font-size: 16px;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .dept-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .dept-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #eee;
+            padding: 14px 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .dept-btn i { color: var(--primary-blue); font-size: 12px;}
+        .dept-btn:active { background-color: #eef2f6; transform: scale(0.99); }
+
+        /* 2) 학부 연락처 */
+        .contact-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+        }
+        .contact-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 15px;
+            color: #444;
+        }
+        .contact-row i {
+            color: var(--primary-blue);
+            width: 28px;
+            font-size: 16px;
+            text-align: center;
+            margin-right: 8px;
+        }
+        .contact-row:last-child { margin-bottom: 0; }
+
+        /* 3) 운영시간 */
+        .hours-status-box {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            background-color: #f0f7ff; 
+            border: 1px solid #d0e3ff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .hours-status-box h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 6px;
+        }
+        .hours-status-box p {
+            font-size: 14px;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            background-color: #28a745;
+        }
+
+        /* --- 5. Bottom Navigation (Fixed) --- */
+        .bottom-nav {
+            background-color: var(--primary-blue);
+            height: 100px;
+            flex-shrink: 0; /* 높이 고정 */
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            z-index: 50;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1); /* 상단 그림자 추가 */
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-item:last-child { border-right: none; }
+        .nav-item.active { background-color: var(--active-yellow); color: #333; }
+        .nav-item.active .icon-box { border-color: #333; }
+        
+        .icon-box { font-size: 20px; margin-bottom: 5px; }
+        .nav-text {             font-size: 11px; 
+            font-weight: 500; 
+            text-align: center; 
+            white-space: nowrap; /* 줄바꿈 방지 */ }
+
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- [NEW] Scroll Container: 헤더와 컨텐츠를 감싸서 전체 스크롤 적용 -->
+        <div class="scroll-container">
+            
+            <!-- HEADER -->
+            <header>
+                <div class="header-top">
+                    <div class="logo-group">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <h1>동양미래대학교<br><span>컴퓨터공학부</span></h1>
+                    </div>
+                    <div class="current-time" id="clock-display">Loading...</div>
+                </div>
+
+                <div class="main-copy">
+                    IT 전문가로의 성장!<br>
+                    <span class="sub">컴퓨터공학부가 함께합니다.</span>
+                </div>
+
+                <!-- Slider -->
+                <div class="slider-wrapper">
+                    <div class="slide-image" id="slide-img" style="background-image: url('https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop');"></div>
+                    <div class="slide-caption">2024 졸업작품전시회</div>
+                </div>
+            </header>
+
+            <!-- MAIN CONTENT -->
+            <section class="main-content">
+                
+                <!-- 1. 학부 소개 -->
+                <div class="info-section">
+                    <h2>학부 소개</h2>
+                    <div class="section-content">
+                        <p class="intro-text">
+                            창의적 문제해결 능력을 갖춘 <br>
+                            <strong>현장 실무형 소프트웨어 전문 인재</strong> 양성
+                        </p>
+                        <div class="dept-btn-group">
+                            <a href="#" class="dept-btn">
+                                컴퓨터소프트웨어공학과 <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 학부 연락처 -->
+                <div class="info-section">
+                    <h2>학부 연락처</h2>
+                    <div class="section-content">
+                        <div class="contact-box">
+                            <div class="contact-row">
+                                <i class="fa-solid fa-location-dot"></i>
+                                <span>4호관 204호 학부사무실</span>
+                            </div>
+                            <div class="contact-row">
+                                <i class="fa-solid fa-phone"></i>
+                                <span>02-2610-1700 (행정실)</span>
+                            </div>
+                            <div class="contact-row">
+                                <i class="fa-regular fa-envelope"></i>
+                                <span>computer@dongyang.ac.kr</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. 운영시간 -->
+                <div class="info-section">
+                    <h2>운영시간 안내</h2>
+                    <div class="section-content">
+                        <div class="hours-status-box" id="hours-status">
+                            <!-- JS로 내용 주입 -->
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+        <!-- // Scroll Container End -->
+
+        <!-- BOTTOM NAV (Fixed) -->
+        <nav class="bottom-nav">
+            <!-- 1. 홈 -->
+            <a href="index.html" class="nav-item">
+                <div class="icon-box"><i class="fa-solid fa-house"></i></div>
+                <span class="nav-text">홈</span>
+            </a>
+            <!-- 2. 강의실 현황 -->
+            <a href="class.html" class="nav-item">
+                <div class="icon-box"><i class="fa-regular fa-calendar-check"></i></div>
+                <span class="nav-text">강의실현황</span>
+            </a>
+            <!-- 3. 학과별 공지 -->
+            <a href="notice.html" class="nav-item">
+                <div class="icon-box"><i class="fa-solid fa-circle-exclamation"></i></div>
+                <span class="nav-text">학과별공지</span>
+            </a>
+            <!-- 4. 학부 앨범 -->
+            <a href="album.html" class="nav-item">
+                <div class="icon-box"><i class="fa-regular fa-images"></i></div>
+                <span class="nav-text">학부앨범</span>
+            </a>
+            <!-- 5. 분실물 확인 -->
+            <a href="lost.html" class="nav-item">
+                <div class="icon-box"><i class="fa-solid fa-box-open"></i></div>
+                <span class="nav-text">분실물확인</span>
+            </a>
+            <!-- 6. AI 챗봇 (Active) -->
+            <a href="chatbot.html" class="nav-item active">
+                <div class="icon-box"><i class="fa-solid fa-comments"></i></div>
+                <span class="nav-text">AI 챗봇</span>
+            </a>
+        </nav>
+        </nav>
+    </div>
+
+    <script>
+        // --- 1. Clock Logic ---
+        function updateClock() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const date = String(now.getDate()).padStart(2, '0');
+            const days = ['일','월','화','수','목','금','토'];
+            const dayName = days[now.getDay()];
+            
+            let h = now.getHours();
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12; h = h ? h : 12;
+            const m = String(now.getMinutes()).padStart(2, '0');
+
+            document.getElementById('clock-display').innerText = `${year}-${month}-${date}(${dayName}) ${h}:${m} ${ampm}`;
+            
+            checkOfficeStatus(now.getHours());
+        }
+
+        // --- 2. Operation Hours Logic ---
+        function checkOfficeStatus(hour) {
+            const box = document.getElementById('hours-status');
+            
+            if (hour === 12) {
+                box.innerHTML = `
+                    <span class="status-badge" style="background:#ffc107; color:#000;">점심시간</span>
+                    <h3>12:00 ~ 13:00</h3>
+                    <p>현재 점심시간입니다.<br>13시 이후 방문해주세요.</p>
+                `;
+                box.style.backgroundColor = '#fff9db';
+                box.style.borderColor = '#ffecb5';
+            } 
+            else if (hour >= 9 && hour < 18) {
+                box.innerHTML = `
+                    <span class="status-badge" style="background:#28a745;">업무중</span>
+                    <h3>09:00 ~ 18:00</h3>
+                    <p>현재 행정실 업무시간입니다.<br>204호로 방문해주세요.</p>
+                `;
+                box.style.backgroundColor = '#f0f7ff';
+                box.style.borderColor = '#d0e3ff';
+            } 
+            else {
+                box.innerHTML = `
+                    <span class="status-badge" style="background:#6c757d;">업무종료</span>
+                    <h3>09:00 ~ 18:00</h3>
+                    <p>현재 업무 시간이 아닙니다.<br>평일 운영시간에 방문해주세요.</p>
+                `;
+                box.style.backgroundColor = '#f8f9fa';
+                box.style.borderColor = '#dee2e6';
+            }
+        }
+
+        // --- 3. Slider Logic ---
+        const images = [
+            'https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1504384308090-c54be3852f33?q=80&w=1887&auto=format&fit=crop'
+        ];
+        let idx = 0;
+        function slide() {
+            idx = (idx + 1) % images.length;
+            const el = document.getElementById('slide-img');
+            el.style.opacity = 0;
+            setTimeout(() => {
+                el.style.backgroundImage = `url('${images[idx]}')`;
+                el.style.opacity = 1;
+            }, 300);
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+        setInterval(slide, 5000);
+    </script>
+</body>
+</html>
